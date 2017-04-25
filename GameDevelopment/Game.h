@@ -7,6 +7,7 @@
 #include "StepTimer.h"
 #include <SpriteBatch.h>
 #include <SpriteFont.h>
+#include <SimpleMath.h>
 
 
 // A basic game implementation that creates a D3D11 device and
@@ -67,5 +68,10 @@ private:
 
 	std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
 	std::unique_ptr<DirectX::SpriteFont> m_spriteFont;
+
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texture;		//テクスチャ
+
+	DirectX::SimpleMath::Vector2 m_screenPos;	//スプライト表示スクリーン座標
+	DirectX::SimpleMath::Vector2 m_origin;		//スプライトの原点
 
 };

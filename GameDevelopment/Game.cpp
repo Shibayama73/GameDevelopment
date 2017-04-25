@@ -5,6 +5,10 @@
 #include "pch.h"
 #include "Game.h"
 
+#include <WICTextureLoader.h>	//CreateWICTextureFromFile()
+#include <DDSTextureLoader.h>
+#include <CommonStates.h>
+
 extern void ExitGame();
 
 using namespace DirectX;
@@ -37,8 +41,37 @@ void Game::Initialize(HWND window, int width, int height)
     m_timer.SetTargetElapsedSeconds(1.0 / 60);
     */
 
+	//	文字設定
 	m_spriteBatch = std::make_unique<SpriteBatch>(m_d3dContext.Get());
 	m_spriteFont = std::make_unique<SpriteFont>(m_d3dDevice.Get(), L"Resouces/myfile.spritefont");
+
+	//	リソース読み込み
+	ComPtr<ID3D11Resource> resource;
+	DX::ThrowIfFailed(
+		CreateWICTextureFromFile(m_d3dDevice.Get(), L"Resouces/cat.png",resource.GetAddressOf(),
+			m_texture.ReleaseAndGetAddressOf()));
+
+	//	アセットから読み込み
+	/*DX::ThrowIfFailed(
+		CreateDDSTextureFromFile(m_d3dDevice.Get(), L"Resouces/cat.dds", resource.GetAddressOf(),
+			m_texture.ReleaseAndGetAddressOf()));*/
+
+	//	リソースから猫のテクスチャと判断
+	ComPtr<ID3D11Texture2D> cat;
+	DX::ThrowIfFailed(resource.As(&cat));
+
+	//	テクスチャ情報
+	CD3D11_TEXTURE2D_DESC catDesc;
+	cat->GetDesc(&catDesc);
+
+	//	テクスチャ原点を画像の中心にする
+	m_origin.x = float(catDesc.Width / 2);
+	m_origin.y = float(catDesc.Height / 2);
+
+	//	表示座標を画面中央に指定
+	m_screenPos.x = m_outputWidth / 2.f;
+	m_screenPos.y = m_outputHeight / 2.f;
+
 
 }
 
@@ -75,8 +108,27 @@ void Game::Render()
 
     // TODO: Add your rendering code here.
 
-	m_spriteBatch->Begin();
+	//	スプライトの描画
+	//m_spriteBatch->Begin();
+	CommonStates m_states(m_d3dDevice.Get());
+	m_spriteBatch->Begin(SpriteSortMode_Deferred, m_states.NonPremultiplied());	//NonPremultipliedで不透明の設定
+
+	//	切り取り範囲の設定
+	/*RECT rect;
+	rect.left = 30;
+	rect.right = 70;
+	rect.top = 30;
+	rect.bottom = 70;*/
+
+	//	スプライト
+	m_spriteBatch->Draw(m_texture.Get(), m_screenPos, nullptr, Colors::White, 0.f, m_origin);
+	//m_spriteBatch->Draw(m_texture.Get(), m_screenPos, nullptr, Colors::White, XMConvertToRadians(90.0f), m_origin);
+	//m_spriteBatch->Draw(m_texture.Get(), m_screenPos, &rect, Colors::White, 0.f, m_origin);
+	
+
+	//	文字
 	m_spriteFont->DrawString(m_spriteBatch.get(), L"Hello, world!", XMFLOAT2(100, 100));
+	
 	m_spriteBatch->End();
 
     Present();
