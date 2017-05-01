@@ -8,6 +8,7 @@
 #include <SpriteBatch.h>
 #include <SpriteFont.h>
 #include <SimpleMath.h>
+#include <Keyboard.h>
 
 
 // A basic game implementation that creates a D3D11 device and
@@ -74,4 +75,10 @@ private:
 	DirectX::SimpleMath::Vector2 m_screenPos;	//スプライト表示スクリーン座標
 	DirectX::SimpleMath::Vector2 m_origin;		//スプライトの原点
 
+	std::unique_ptr<DirectX::Keyboard> m_keyboard;	//キーボード
+	DirectX::Keyboard::KeyboardStateTracker m_keyboardTracker;			//キーボードのトラッカー
+
+	bool m_showTexture;	//表示
+	bool m_showNum;
+	bool m_showRelease;
 };

@@ -72,6 +72,8 @@ void Game::Initialize(HWND window, int width, int height)
 	m_screenPos.x = m_outputWidth / 2.f;
 	m_screenPos.y = m_outputHeight / 2.f;
 
+	//	キーボードのオブジェクト生成
+	m_keyboard = std::make_unique<Keyboard>();
 
 }
 
@@ -89,10 +91,72 @@ void Game::Tick()
 // Updates the world.
 void Game::Update(DX::StepTimer const& timer)
 {
-    float elapsedTime = float(timer.GetElapsedSeconds());
+	float elapsedTime = float(timer.GetElapsedSeconds());
 
-    // TODO: Add your game logic here.
-    elapsedTime;
+	// TODO: Add your game logic here.
+
+	Keyboard::State kb = m_keyboard->GetState();	//キーボードの状態を取得
+	m_keyboardTracker.Update(kb);	//キーボードトラッカーの更新
+
+	m_showTexture = false;
+	m_showNum = false;
+	m_showRelease = false;
+
+	//	トリガー判定
+	//	押した瞬間のみ
+	if (m_keyboardTracker.pressed.Space)
+	{
+		m_showNum = true;
+	}
+
+	//	放した時
+	if (m_keyboardTracker.IsKeyReleased(Keyboard::Keys::Back))
+	{
+		m_showRelease = true;
+	}
+
+	//	押されているとき
+	if (kb.Enter)
+	{
+		m_showTexture = true;
+
+	}
+	if (kb.Back)
+	{
+		// Backspace key is down
+		//m_str = L"BackSpace!!";
+	}
+	if (kb.W)
+	{
+		// W key is down
+	}
+	if (kb.A)
+	{
+		// A key is down
+	}
+	if (kb.S)
+	{
+		// S key is down
+	}
+	if (kb.D)
+	{
+		// D key is down
+	}
+	if (kb.LeftShift)
+	{
+		// Left shift key is down
+	}
+	if (kb.RightShift)
+	{
+		// Right shift key is down
+	//}
+	//if (kb.IsKeyDown(VK_RETURN))
+	//{
+	//	// Return key is down
+	//}
+
+		elapsedTime;
+	}
 }
 
 // Draws the scene.
@@ -120,15 +184,35 @@ void Game::Render()
 	rect.top = 30;
 	rect.bottom = 70;*/
 
-	//	スプライト
-	m_spriteBatch->Draw(m_texture.Get(), m_screenPos, nullptr, Colors::White, 0.f, m_origin);
+	//	表示がtrueのときスプライトの表示
+	if (m_showTexture == true);
+	else
+	{
+		//	スプライト
+		m_spriteBatch->Draw(m_texture.Get(), m_screenPos, nullptr, Colors::White, 0.f, m_origin);
+	}
+
+
 	//m_spriteBatch->Draw(m_texture.Get(), m_screenPos, nullptr, Colors::White, XMConvertToRadians(90.0f), m_origin);
 	//m_spriteBatch->Draw(m_texture.Get(), m_screenPos, &rect, Colors::White, 0.f, m_origin);
 	
-
 	//	文字
-	m_spriteFont->DrawString(m_spriteBatch.get(), L"Hello, world!", XMFLOAT2(100, 100));
-	
+	//m_spriteFont->DrawString(m_spriteBatch.get(), L"Hello, world!", XMFLOAT2(100, 100));
+
+	//	押した瞬間のみ文字表示
+	if (m_showNum == true);
+	else
+	{
+		m_spriteFont->DrawString(m_spriteBatch.get(), L"Press!", XMFLOAT2(100, 100));
+	}
+
+	//	放したとき文字表示
+	if (m_showRelease == true)
+	{
+		m_spriteFont->DrawString(m_spriteBatch.get(), L"Release!", XMFLOAT2(100, 300));
+	}
+
+
 	m_spriteBatch->End();
 
     Present();
