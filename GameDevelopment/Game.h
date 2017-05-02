@@ -9,6 +9,7 @@
 #include <SpriteFont.h>
 #include <SimpleMath.h>
 #include <Keyboard.h>
+#include <Mouse.h>
 
 
 // A basic game implementation that creates a D3D11 device and
@@ -81,4 +82,8 @@ private:
 	bool m_showTexture;	//表示
 	bool m_showNum;
 	bool m_showRelease;
+
+	std::unique_ptr<DirectX::Mouse> m_mouse;	//マウス
+	DirectX::Mouse::ButtonStateTracker m_mouseTracker;
+
 };

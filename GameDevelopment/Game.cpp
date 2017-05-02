@@ -74,6 +74,10 @@ void Game::Initialize(HWND window, int width, int height)
 
 	//	キーボードのオブジェクト生成
 	m_keyboard = std::make_unique<Keyboard>();
+	//	マウスのオブジェクト生成
+	m_mouse = std::make_unique<Mouse>();
+	//	ウィンドウハンドラを通知
+	m_mouse->SetWindow(window);
 
 }
 
@@ -102,61 +106,93 @@ void Game::Update(DX::StepTimer const& timer)
 	m_showNum = false;
 	m_showRelease = false;
 
-	//	トリガー判定
-	//	押した瞬間のみ
-	if (m_keyboardTracker.pressed.Space)
+	////	トリガー判定
+	////	押した瞬間のみ
+	//if (m_keyboardTracker.pressed.Space)
+	//{
+	//	m_showNum = true;
+	//}
+
+	////	放した時
+	//if (m_keyboardTracker.IsKeyReleased(Keyboard::Keys::Back))
+	//{
+	//	m_showRelease = true;
+	//}
+
+	////	押されているとき
+	//if (kb.Enter)
+	//{
+	//	m_showTexture = true;
+
+	//}
+	//if (kb.Back)
+	//{
+	//	// Backspace key is down
+	//	//m_str = L"BackSpace!!";
+	//}
+	//if (kb.W)
+	//{
+	//	// W key is down
+	//}
+	//if (kb.A)
+	//{
+	//	// A key is down
+	//}
+	//if (kb.S)
+	//{
+	//	// S key is down
+	//}
+	//if (kb.D)
+	//{
+	//	// D key is down
+	//}
+	//if (kb.LeftShift)
+	//{
+	//	// Left shift key is down
+	//}
+	//if (kb.RightShift)
+	//{
+	//	// Right shift key is down
+	////}
+	////if (kb.IsKeyDown(VK_RETURN))
+	////{
+	////	// Return key is down
+	////}
+
+	//	elapsedTime;
+	//}
+
+
+	Mouse::State state = m_mouse->GetState();	//マウスの状態を取得
+	m_mouseTracker.Update(state);
+
+	if (m_mouseTracker.rightButton == Mouse::ButtonStateTracker::PRESSED)
 	{
 		m_showNum = true;
 	}
 
-	//	放した時
-	if (m_keyboardTracker.IsKeyReleased(Keyboard::Keys::Back))
+	if (state.leftButton)
 	{
-		m_showRelease = true;
+		m_showNum = true;
+		//m_showTexture = true;
 	}
 
-	//	押されているとき
-	if (kb.Enter)
-	{
-		m_showTexture = true;
+	//	マウスの座標取得(XMFLOAT2=Vecter2のこと)
+	//XMFLOAT2 mousePosInPixels(float(state.x), float(state.y));
+	SimpleMath::Vector2 mousePosInPixels(float(state.x), float(state.y));
 
-	}
-	if (kb.Back)
-	{
-		// Backspace key is down
-		//m_str = L"BackSpace!!";
-	}
-	if (kb.W)
-	{
-		// W key is down
-	}
-	if (kb.A)
-	{
-		// A key is down
-	}
-	if (kb.S)
-	{
-		// S key is down
-	}
-	if (kb.D)
-	{
-		// D key is down
-	}
-	if (kb.LeftShift)
-	{
-		// Left shift key is down
-	}
-	if (kb.RightShift)
-	{
-		// Right shift key is down
-	//}
-	//if (kb.IsKeyDown(VK_RETURN))
-	//{
-	//	// Return key is down
-	//}
+	m_screenPos = mousePosInPixels;	//ネコスプライトの座標とマウスを合わせる
 
-		elapsedTime;
+	//	相対座標
+	if (m_mouseTracker.leftButton == Mouse::ButtonStateTracker::ButtonState::PRESSED)
+	{
+		m_mouse->SetMode(Mouse::MODE_RELATIVE);
 	}
+	else if (m_mouseTracker.leftButton == Mouse::ButtonStateTracker::ButtonState::RELEASED)
+	{
+		m_mouse->SetMode(Mouse::MODE_ABSOLUTE);
+	}
+
 }
 
 // Draws the scene.
