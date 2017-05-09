@@ -10,6 +10,7 @@
 #include <SimpleMath.h>
 #include <Keyboard.h>
 #include <Mouse.h>
+#include "ADX2Le.h"
 
 
 // A basic game implementation that creates a D3D11 device and
@@ -19,6 +20,7 @@ class Game
 public:
 
     Game();
+	virtual ~Game();
 
     // Initialization and management
     void Initialize(HWND window, int width, int height);
