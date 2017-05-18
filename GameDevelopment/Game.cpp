@@ -55,32 +55,48 @@ void Game::Initialize(HWND window, int width, int height)
 	m_spriteBatch = std::make_unique<SpriteBatch>(m_d3dContext.Get());
 	m_spriteFont = std::make_unique<SpriteFont>(m_d3dDevice.Get(), L"Resouces/myfile.spritefont");
 
+	////	リソース読み込み
+	//ComPtr<ID3D11Resource> resource;
+	//DX::ThrowIfFailed(
+	//	CreateWICTextureFromFile(m_d3dDevice.Get(), L"Resouces/cat.png",resource.GetAddressOf(),
+	//		m_texture.ReleaseAndGetAddressOf()));
+
 	//	リソース読み込み
-	ComPtr<ID3D11Resource> resource;
+	ComPtr<ID3D11Resource> resourceAttack;
 	DX::ThrowIfFailed(
-		CreateWICTextureFromFile(m_d3dDevice.Get(), L"Resouces/cat.png",resource.GetAddressOf(),
-			m_texture.ReleaseAndGetAddressOf()));
+		CreateWICTextureFromFile(m_d3dDevice.Get(), L"Resouces/attack.png", resourceAttack.GetAddressOf(),
+			m_textureAttack.ReleaseAndGetAddressOf()));
+
+	//	リソース読み込み
+	ComPtr<ID3D11Resource> resourceShield;
+	DX::ThrowIfFailed(
+		CreateWICTextureFromFile(m_d3dDevice.Get(), L"Resouces/shield.png", resourceShield.GetAddressOf(),
+			m_textureShield.ReleaseAndGetAddressOf()));
 
 	//	アセットから読み込み
 	/*DX::ThrowIfFailed(
 		CreateDDSTextureFromFile(m_d3dDevice.Get(), L"Resouces/cat.dds", resource.GetAddressOf(),
 			m_texture.ReleaseAndGetAddressOf()));*/
 
-	//	リソースから猫のテクスチャと判断
-	ComPtr<ID3D11Texture2D> cat;
-	DX::ThrowIfFailed(resource.As(&cat));
+	////	リソースから猫のテクスチャと判断
+	//ComPtr<ID3D11Texture2D> cat;
+	//DX::ThrowIfFailed(resource.As(&cat));
 
-	//	テクスチャ情報
-	CD3D11_TEXTURE2D_DESC catDesc;
-	cat->GetDesc(&catDesc);
+	////	テクスチャ情報
+	//CD3D11_TEXTURE2D_DESC catDesc;
+	//cat->GetDesc(&catDesc);
 
-	//	テクスチャ原点を画像の中心にする
-	m_origin.x = float(catDesc.Width / 2);
-	m_origin.y = float(catDesc.Height / 2);
+	////	テクスチャ原点を画像の中心にする
+	//m_origin.x = float(catDesc.Width / 2);
+	//m_origin.y = float(catDesc.Height / 2);
+
+	////	表示座標を画面中央に指定
+	//m_screenPos.x = m_outputWidth / 2.f;
+	//m_screenPos.y = m_outputHeight / 2.f;
 
 	//	表示座標を画面中央に指定
-	m_screenPos.x = m_outputWidth / 2.f;
-	m_screenPos.y = m_outputHeight / 2.f;
+	m_screenPos.x = m_outputWidth / 4.0f;
+	m_screenPos.y = m_outputHeight / 4.0f;
 
 	//	キーボードのオブジェクト生成
 	m_keyboard = std::make_unique<Keyboard>();
@@ -89,6 +105,8 @@ void Game::Initialize(HWND window, int width, int height)
 	//	ウィンドウハンドラを通知
 	m_mouse->SetWindow(window);
 
+	//	ゲームパッドのオブジェクト生成
+	m_gamePad = std::make_unique<GamePad>();
 
 	//	サウンド=====================================================================
 	//	サウンドACFファイルの読み込み
@@ -104,6 +122,11 @@ void Game::Initialize(HWND window, int width, int height)
 
 	//==============================================================================-
 
+	m_modeState = false;
+
+	//	ジョイパッド作成
+	m_pJoyPad = std::make_unique<JoyPad>();
+	m_pJoyPad->Initialize(window);
 
 }
 
@@ -134,6 +157,10 @@ void Game::Update(DX::StepTimer const& timer)
 	m_showTexture = false;
 	m_showNum = false;
 	m_showRelease = false;
+
+	//	表示
+	m_attackSow = false;
+	m_shieldShow = false;
 
 	////	トリガー判定
 	////	押した瞬間のみ
@@ -191,35 +218,97 @@ void Game::Update(DX::StepTimer const& timer)
 	//	elapsedTime;
 	//}
 
+	//===================================================================================
+	//Mouse::State state = m_mouse->GetState();	//マウスの状態を取得
+	//m_mouseTracker.Update(state);
 
-	Mouse::State state = m_mouse->GetState();	//マウスの状態を取得
-	m_mouseTracker.Update(state);
+	//if (m_mouseTracker.rightButton == Mouse::ButtonStateTracker::PRESSED)
+	//{
+	//	m_showNum = true;
+	//}
 
-	if (m_mouseTracker.rightButton == Mouse::ButtonStateTracker::PRESSED)
+	//if (state.leftButton)
+	//{
+	//	m_showNum = true;
+	//	//m_showTexture = true;
+	//}
+
+	////	マウスの座標取得(XMFLOAT2=Vecter2のこと)
+	////XMFLOAT2 mousePosInPixels(float(state.x), float(state.y));
+	//SimpleMath::Vector2 mousePosInPixels(float(state.x), float(state.y));
+
+	//m_screenPos = mousePosInPixels;	//ネコスプライトの座標とマウスを合わせる
+
+	////	相対座標
+	//if (m_mouseTracker.leftButton == Mouse::ButtonStateTracker::ButtonState::PRESSED)
+	//{
+	//	m_mouse->SetMode(Mouse::MODE_RELATIVE);
+	//}
+	//else if (m_mouseTracker.leftButton == Mouse::ButtonStateTracker::ButtonState::RELEASED)
+	//{
+	//	m_mouse->SetMode(Mouse::MODE_ABSOLUTE);
+	//}
+
+	//============================================================================================
+
+	//	ゲームパッドの状態取得
+	DirectX::GamePad::State padstate = m_gamePad->GetState(0);
+
+	//	接続の確認
+	if (padstate.IsConnected())
 	{
-		m_showNum = true;
-	}
+		if (m_modeState == false)
+		{
+			//	Aボタンが押されているとき
+			if (padstate.IsAPressed())
+			{
+				m_attackSow = true;
+			}
+			//	Bボタンが押されているとき
+			else if (padstate.IsBPressed())
+			{
+				m_shieldShow = true;
+			}
+		}
 
-	if (state.leftButton)
-	{
-		m_showNum = true;
-		//m_showTexture = true;
-	}
+		if (m_modeState == true)
+		{
+			//	Aボタンが押されているとき
+			if (padstate.IsAPressed())
+			{
+				m_shieldShow = true;
+			}
+			//	Bボタンが押されているとき
+			else if (padstate.IsBPressed())
+			{
+				m_attackSow = true;
+			}
+		}
 
-	//	マウスの座標取得(XMFLOAT2=Vecter2のこと)
-	//XMFLOAT2 mousePosInPixels(float(state.x), float(state.y));
-	SimpleMath::Vector2 mousePosInPixels(float(state.x), float(state.y));
+		//	backボタンが押されたとき
+		m_tracker.Update(padstate);
+		if (m_tracker.back == GamePad::ButtonStateTracker::PRESSED)
+		{
+			if (m_modeState == true)
+				m_modeState = false;
+			else if (m_modeState == false)
+				m_modeState = true;
+		}
 
-	m_screenPos = mousePosInPixels;	//ネコスプライトの座標とマウスを合わせる
 
-	//	相対座標
-	if (m_mouseTracker.leftButton == Mouse::ButtonStateTracker::ButtonState::PRESSED)
-	{
-		m_mouse->SetMode(Mouse::MODE_RELATIVE);
-	}
-	else if (m_mouseTracker.leftButton == Mouse::ButtonStateTracker::ButtonState::RELEASED)
-	{
-		m_mouse->SetMode(Mouse::MODE_ABSOLUTE);
+		//	左スティックの左右
+		float posx = padstate.thumbSticks.leftX;
+		//	左スティックの上下
+		float posy = padstate.thumbSticks.leftY;
+
+		//	右トリガーが押された範囲
+		float throttle = padstate.triggers.right;
+
+		//	振動の設定
+		//if (m_gamePad->SetVibration(0, 0.5f, 0.25f));
+
+
+
 	}
 
 }
@@ -249,14 +338,21 @@ void Game::Render()
 	rect.top = 30;
 	rect.bottom = 70;*/
 
-	//	表示がtrueのときスプライトの表示
-	if (m_showTexture == true);
-	else
+	////	表示がtrueのときスプライトの表示
+	//if (m_showTexture == true);
+	//else
+	//{
+	//	//	スプライト
+	//	m_spriteBatch->Draw(m_texture.Get(), m_screenPos, nullptr, Colors::White, 0.f, m_origin);
+	//}
+	if (m_attackSow == true)
 	{
-		//	スプライト
-		m_spriteBatch->Draw(m_texture.Get(), m_screenPos, nullptr, Colors::White, 0.f, m_origin);
+		m_spriteBatch->Draw(m_textureAttack.Get(), m_screenPos, nullptr, Colors::White, 0.f, m_origin);
 	}
-
+	if (m_shieldShow == true)
+	{
+		m_spriteBatch->Draw(m_textureShield.Get(), m_screenPos, nullptr, Colors::White, 0.f, m_origin);
+	}
 
 	//m_spriteBatch->Draw(m_texture.Get(), m_screenPos, nullptr, Colors::White, XMConvertToRadians(90.0f), m_origin);
 	//m_spriteBatch->Draw(m_texture.Get(), m_screenPos, &rect, Colors::White, 0.f, m_origin);

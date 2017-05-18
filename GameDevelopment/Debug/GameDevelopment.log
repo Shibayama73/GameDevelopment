@@ -1,4 +1,6 @@
 ﻿  Aseets\cat.png
-  Game.cpp
+  JoyPad.cpp
+c:\users\s162098\documents\visual studio 2015\projects\gamedevelopment\gamedevelopment\joypad.cpp(163): warning C4554: '&': 演算子の優先順位に問題があります。かっこを使用して優先順位を明確にしてください
+c:\users\s162098\documents\visual studio 2015\projects\gamedevelopment\gamedevelopment\joypad.cpp(143): warning C4700: 初期化されていないローカル変数 'ret' が使用されます
   GameDevelopment.vcxproj -> C:\Users\s162098\Documents\Visual Studio 2015\Projects\GameDevelopment\Debug\GameDevelopment.exe
   GameDevelopment.vcxproj -> C:\Users\s162098\Documents\Visual Studio 2015\Projects\GameDevelopment\Debug\GameDevelopment.pdb (Full PDB)

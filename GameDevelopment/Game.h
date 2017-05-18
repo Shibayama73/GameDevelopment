@@ -11,6 +11,8 @@
 #include <Keyboard.h>
 #include <Mouse.h>
 #include "ADX2Le.h"
+#include <GamePad.h>
+#include "JoyPad.h"
 
 
 // A basic game implementation that creates a D3D11 device and
@@ -74,6 +76,8 @@ private:
 	std::unique_ptr<DirectX::SpriteFont> m_spriteFont;
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texture;		//テクスチャ
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureAttack;		//テクスチャ
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureShield;		//テクスチャ
 
 	DirectX::SimpleMath::Vector2 m_screenPos;	//スプライト表示スクリーン座標
 	DirectX::SimpleMath::Vector2 m_origin;		//スプライトの原点
@@ -85,7 +89,18 @@ private:
 	bool m_showNum;
 	bool m_showRelease;
 
+	bool m_attackSow;
+	bool m_shieldShow;
+	bool m_modeState;	//モード状態
+
 	std::unique_ptr<DirectX::Mouse> m_mouse;	//マウス
 	DirectX::Mouse::ButtonStateTracker m_mouseTracker;
+
+	std::unique_ptr<DirectX::GamePad> m_gamePad;	//ゲームパッド
+	DirectX::GamePad::ButtonStateTracker m_tracker;
+
+	//	ジョイパッド
+	std::unique_ptr<JoyPad> m_pJoyPad;
+
 
 };
